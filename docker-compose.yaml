@@ -1,0 +1,20 @@
+services:
+  imsa:
+    build: .
+    container_name: imsa
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - OWNER_USER_ID=${OWNER_USER_ID}
+    volumes:
+      - imsa-data:/app/data
+    networks:
+      - imsa-net
+    restart: always
+
+volumes:
+  imsa-data:
+    name: imsa-data
+
+networks:
+  imsa-net:
+    name: imsa-net

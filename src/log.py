@@ -1,0 +1,32 @@
+"""Module to setup logging"""
+
+import logging
+from logging.handlers import RotatingFileHandler
+
+from constants import LOGFILE_BACKUP_COUNT, LOGFILE_MAX_SIZE, LOGFILE_NAME, LOGGER_NAME
+
+# Get logger
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(logging.DEBUG)
+
+# Console handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_formatter = logging.Formatter(
+    "[%(asctime)s] %(levelname)s: %(message)s", datefmt="%Y-%m-%dT%H:%M:%S%z"
+)
+console_handler.setFormatter(console_formatter)
+
+# File handler
+file_handler = RotatingFileHandler(
+    LOGFILE_NAME, maxBytes=LOGFILE_MAX_SIZE, backupCount=LOGFILE_BACKUP_COUNT
+)
+file_handler.setLevel(logging.DEBUG)
+file_formatter = logging.Formatter(
+    "[%(asctime)s] %(levelname)s: %(message)s", datefmt="%Y-%m-%dT%H:%M:%S%z"
+)
+file_handler.setFormatter(file_formatter)
+
+# Add handlers to logger
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
