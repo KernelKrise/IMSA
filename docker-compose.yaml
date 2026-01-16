@@ -1,7 +1,15 @@
 services:
+  imsa-init:
+    image: alpine:latest
+    command: sh -c "chown -R 1000:1000 /app/data"
+    volumes:
+      - imsa-data:/app/data
+
   imsa:
     build: .
     container_name: imsa
+    depends_on:
+      - imsa-init
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
       - OWNER_USER_ID=${OWNER_USER_ID}

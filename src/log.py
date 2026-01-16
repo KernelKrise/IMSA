@@ -3,7 +3,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
-from constants import LOGFILE_BACKUP_COUNT, LOGFILE_MAX_SIZE, LOGFILE_NAME, LOGGER_NAME
+from constants import LOGFILE_BACKUP_COUNT, LOGFILE_MAX_SIZE, LOGFILE_PATH, LOGGER_NAME
 
 # Get logger
 logger = logging.getLogger(LOGGER_NAME)
@@ -19,7 +19,7 @@ console_handler.setFormatter(console_formatter)
 
 # File handler
 file_handler = RotatingFileHandler(
-    LOGFILE_NAME, maxBytes=LOGFILE_MAX_SIZE, backupCount=LOGFILE_BACKUP_COUNT
+    LOGFILE_PATH, maxBytes=LOGFILE_MAX_SIZE, backupCount=LOGFILE_BACKUP_COUNT
 )
 file_handler.setLevel(logging.DEBUG)
 file_formatter = logging.Formatter(

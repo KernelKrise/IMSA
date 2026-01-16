@@ -8,10 +8,11 @@ ENV POETRY_VERSION=2.2.1 \
     POETRY_HOME=/opt/poetry \
     POETRY_VIRTUALENVS_CREATE=true \
     POETRY_VIRTUALENVS_IN_PROJECT=true \
-    USERNAME=user
+    USERNAME=user \
+    UID=1000
 
 # Create a new user and group
-RUN groupadd -r "${USERNAME}" && useradd -r -g "${USERNAME}" "${USERNAME}"
+RUN groupadd -r "${USERNAME}" && useradd -u "${UID}" -r -g "${USERNAME}" "${USERNAME}"
 
 
 # Builder stage

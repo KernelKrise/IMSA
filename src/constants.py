@@ -1,6 +1,22 @@
 """Constants module"""
 
+from os import path
+
+DATA_DIR: str = "data"
+
 LOGGER_NAME: str = "imsa"
 LOGFILE_NAME: str = "imsa.log"
+LOGFILE_PATH: str = path.join(DATA_DIR, LOGFILE_NAME)
 LOGFILE_MAX_SIZE: int = 5 * 1024 * 1024
 LOGFILE_BACKUP_COUNT: int = 10
+
+SQLITE_DB_FILENAME: str = "imsa.db"
+SQLITE_DB_FILEPATH: str = path.join(DATA_DIR, SQLITE_DB_FILENAME)
+
+ROLE_USER: str = "user"
+ROLE_ADMIN: str = "admin"
+
+OWNER_DEFAULT_USERNAME: str = "OWNER"
+
+COMMAND_ID: str = "id"
+COMMAND_HELP: str = "help"
