@@ -3,7 +3,8 @@ Is My Server Alive? Telegram Bot
 
 ## Description
 
-TODO: Bot is not ready yet.
+Deploy this bot on your server. When lauched, if the bot responds, the server is alive and you can get runtime information.
+If not, the server is down. So, you can track your server availability even if it under NAT.
 
 ## Environment
 
@@ -22,3 +23,9 @@ You need to fill out file: `.env` as in `env_example` with the following values:
 ```bash
 docker compose up -d
 ```
+
+## TODO
+- Notify users that server started
+- Downtime tracking
+- Track network issues
+- Write documentation
