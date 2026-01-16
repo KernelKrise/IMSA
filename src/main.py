@@ -9,10 +9,10 @@ from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart
 from aiogram.types import BotCommand, Message
 
-from constants import COMMAND_HELP, COMMAND_ID
+from constants import COMMAND_CHECK, COMMAND_HELP, COMMAND_ID
 from db import IMSADB
 from env_vars import BOT_TOKEN
-from helpers import render_template
+from helpers import get_uptime, render_template
 from log import log_userinfo, logger
 
 # Bot dispatcher
@@ -42,7 +42,7 @@ def only_for_registered(handler):
     @wraps(handler)
     async def wrapper(message: Message, *args, **kwargs):
         assert message.from_user is not None
-        if db.is_user(message.from_user.id) is False:
+        if await db.is_user(message.from_user.id) is False:
             logger.debug(
                 "Access denied for not registered user. %s", log_userinfo(message)
             )
@@ -59,7 +59,7 @@ def only_for_admin(handler):
     @wraps(handler)
     async def wrapper(message: Message, *args, **kwargs):
         assert message.from_user is not None
-        if db.is_admin(message.from_user.id) is False:
+        if await db.is_admin(message.from_user.id) is False:
             logger.debug("Admin access denied. %s", log_userinfo(message))
             return
         return await handler(message, *args, **kwargs)
@@ -98,22 +98,24 @@ async def command_help_handler(message: Message) -> None:
     assert message.from_user is not None
     logger.debug("Sending help message. %s", log_userinfo(message))
 
-    if db.is_admin(message.from_user.id):
+    if await db.is_admin(message.from_user.id):
         await message.answer(
             render_template(
                 "help_admin.html",
                 cmd_start=CommandStart().commands[0],
                 cmd_help=COMMAND_HELP,
                 cmd_id=COMMAND_ID,
+                cmd_check=COMMAND_CHECK,
             )
         )
-    elif db.is_user(message.from_user.id):
+    elif await db.is_user(message.from_user.id):
         await message.answer(
             render_template(
                 "help_user.html",
                 cmd_start=CommandStart().commands[0],
                 cmd_help=COMMAND_HELP,
                 cmd_id=COMMAND_ID,
+                cmd_check=COMMAND_CHECK,
             )
         )
     else:
@@ -125,6 +127,23 @@ async def command_help_handler(message: Message) -> None:
                 cmd_id=COMMAND_ID,
             )
         )
+
+
+@dp.message(Command(COMMAND_CHECK))
+@only_for_registered
+async def command_check_handler(message: Message) -> None:
+    """This handler receives messages with 'check' command"""
+    assert message.from_user is not None
+
+    # Get server uptime
+    logger.debug("Sending check. %s", log_userinfo(message))
+    uptime = await get_uptime()
+    if uptime is None:
+        await message.answer(
+            render_template("error.html", details="Failed to get server uptime")
+        )
+        return
+    await message.answer(render_template("check.html", uptime=uptime))
 
 
 async def main():

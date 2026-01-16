@@ -20,3 +20,4 @@ OWNER_DEFAULT_USERNAME: str = "OWNER"
 
 COMMAND_ID: str = "id"
 COMMAND_HELP: str = "help"
+COMMAND_CHECK: str = "check"

@@ -14,6 +14,12 @@ ENV POETRY_VERSION=2.2.1 \
 # Create a new user and group
 RUN groupadd -r "${USERNAME}" && useradd -u "${UID}" -r -g "${USERNAME}" "${USERNAME}"
 
+# Install dependencies
+RUN DEBIAN_FRONTEND=noninteractive apt update -y && \
+    DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+    procps \
+    && rm -rf /var/lib/apt/lists/*
+
 
 # Builder stage
 FROM base AS builder

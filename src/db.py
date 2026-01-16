@@ -214,7 +214,7 @@ class IMSADB:
             bool: True if user or admin, False if not.
         """
         # Get sender role
-        sender_role = self.get_role(telegram_id)
+        sender_role = await self.get_role(telegram_id)
 
         if sender_role in (ROLE_ADMIN, ROLE_USER):
             return True
@@ -230,7 +230,7 @@ class IMSADB:
             bool: True if admin, False if not.
         """
         # Get sender role
-        sender_role = self.get_role(telegram_id)
+        sender_role = await self.get_role(telegram_id)
 
         if sender_role == ROLE_ADMIN:
             return True
