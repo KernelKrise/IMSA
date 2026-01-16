@@ -15,6 +15,7 @@ from constants import (
     COMMAND_ADDUSER,
     COMMAND_CANCEL,
     COMMAND_CHECK,
+    COMMAND_DELUSER,
     COMMAND_GETUSERS,
     COMMAND_HELP,
     COMMAND_ID,
@@ -34,11 +35,17 @@ db = IMSADB()
 
 
 class AddUserSession(StatesGroup):
-    """Class to handle states"""
+    """Class to handle states of adduser command"""
 
     adduser_telegram_id = State()
     adduser_name = State()
     adduser_role = State()
+
+
+class DelUserSession(StatesGroup):
+    """Class to handle states of deluser command"""
+
+    deluser_telegram_id = State()
 
 
 def require_user(func):
@@ -136,6 +143,8 @@ async def command_help_handler(message: Message) -> None:
                 cmd_check=COMMAND_CHECK,
                 cmd_adduser=COMMAND_ADDUSER,
                 cmd_cancel=COMMAND_CANCEL,
+                cmd_getusers=COMMAND_GETUSERS,
+                cmd_deluser=COMMAND_DELUSER,
             )
         )
     elif await db.is_user(message.from_user.id):
@@ -192,6 +201,51 @@ async def command_getusers_handler(message: Message) -> None:
 
     # Send all users
     await message.answer(render_template("getusers.html", users=users))
+
+
+@dp.message(Command(COMMAND_DELUSER))
+@only_for_admin
+async def command_deluser_handler(message: Message, state: FSMContext) -> None:
+    """This handler receives messages with 'delete_user' command"""
+    assert message.from_user is not None
+    logger.debug("Handling deluser. %s", log_userinfo(message))
+
+    # Ask for target user Telegram ID
+    await message.answer(render_template("deluser_telegram_id.html"))
+    await state.set_state(DelUserSession.deluser_telegram_id)
+
+
+@dp.message(DelUserSession.deluser_telegram_id)
+@only_for_admin
+async def command_deluser_telegram_id_handler(message: Message, state: FSMContext):
+    """This handler receives telegram_id with 'delete_user' command"""
+    assert message.from_user is not None
+    logger.debug("Handling deluser telegram_id. %s", log_userinfo(message))
+
+    # Get Telegram ID
+    try:
+        telegram_id = int(str(message.text))
+    except ValueError:
+        await message.answer(
+            render_template("error.html", details="Incorrect Telegram ID")
+        )
+        await command_cancel(message, state)
+        return
+    logger.debug(
+        "Got Telegram ID to delete user: %d. %s", telegram_id, log_userinfo(message)
+    )
+
+    # Delete user
+    result = await db.delete_user(telegram_id)
+    if result is False:
+        await message.answer(
+            render_template("error.html", details="Failed to delete user")
+        )
+        await command_cancel(message, state)
+        return
+
+    # Final message
+    await message.answer(render_template("deluser_final.html"))
 
 
 @dp.message(Command(COMMAND_ADDUSER))
