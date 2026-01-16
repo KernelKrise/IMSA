@@ -359,6 +359,15 @@ async def command_adduser_role_handler(message: Message, state: FSMContext):
     await state.clear()
 
 
+@dp.message()
+@require_user
+async def unknown_message_handler(message: Message):
+    """This handler receives unknown commands"""
+    assert message.from_user is not None
+    logger.debug("Handling unknown command. %s", log_userinfo(message))
+    await message.answer(render_template("unknown.html", cmd_help=COMMAND_HELP))
+
+
 async def main():
     """Main application function"""
     logger.info("Application start")
