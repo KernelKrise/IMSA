@@ -13,7 +13,7 @@ from constants import COMMAND_HELP, COMMAND_ID
 from db import IMSADB
 from env_vars import BOT_TOKEN
 from helpers import render_template
-from log import logger
+from log import log_userinfo, logger
 
 # Bot dispatcher
 dp = Dispatcher()
@@ -44,7 +44,7 @@ def only_for_registered(handler):
         assert message.from_user is not None
         if db.is_user(message.from_user.id) is False:
             logger.debug(
-                "Access denied for not registered user: %d", message.from_user.id
+                "Access denied for not registered user. %s", log_userinfo(message)
             )
             return
         return await handler(message, *args, **kwargs)
@@ -60,7 +60,7 @@ def only_for_admin(handler):
     async def wrapper(message: Message, *args, **kwargs):
         assert message.from_user is not None
         if db.is_admin(message.from_user.id) is False:
-            logger.debug("Admin access denied for user: %d", message.from_user.id)
+            logger.debug("Admin access denied. %s", log_userinfo(message))
             return
         return await handler(message, *args, **kwargs)
 
@@ -72,11 +72,7 @@ async def command_id_handler(message: Message) -> None:
     """This handler receives messages with 'id' command"""
     assert message.from_user is not None
 
-    logger.debug(
-        "Sending user ID. Requested by: %d (%s)",
-        message.from_user.id,
-        message.from_user.username,
-    )
+    logger.debug("Sending user ID. %s", log_userinfo(message))
     await message.answer(render_template("id.html", user_id=message.from_user.id))
 
 
@@ -86,11 +82,7 @@ async def command_start_handler(message: Message) -> None:
     assert message.from_user is not None
 
     # Greet user
-    logger.debug(
-        "Starting new chat. Requested by: %d (%s)",
-        message.from_user.id,
-        message.from_user.username,
-    )
+    logger.debug("Sending greeting. %s", log_userinfo(message))
     await message.answer(
         render_template("greeting.html", username=message.from_user.username),
         disable_web_page_preview=True,
@@ -104,12 +96,8 @@ async def command_start_handler(message: Message) -> None:
 async def command_help_handler(message: Message) -> None:
     """This handler receives messages with 'help' command"""
     assert message.from_user is not None
+    logger.debug("Sending help message. %s", log_userinfo(message))
 
-    logger.debug(
-        "Sending help message. Requested by: %d (%s)",
-        message.from_user.id,
-        message.from_user.username,
-    )
     if db.is_admin(message.from_user.id):
         await message.answer(
             render_template(

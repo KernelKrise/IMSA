@@ -3,6 +3,8 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
+from aiogram.types import Message
+
 from constants import LOGFILE_BACKUP_COUNT, LOGFILE_MAX_SIZE, LOGFILE_PATH, LOGGER_NAME
 
 # Get logger
@@ -30,3 +32,16 @@ file_handler.setFormatter(file_formatter)
 # Add handlers to logger
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
+
+
+def log_userinfo(message: Message) -> str:
+    """Compose telegram user info log entry.
+
+    Args:
+        message (Message): message object.
+
+    Returns:
+        str: User info log entry.
+    """
+    assert message.from_user is not None
+    return f"Telegram User Info: {message.from_user.id=}, {message.from_user.username=}"
