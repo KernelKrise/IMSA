@@ -7,12 +7,22 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import BotCommand, Message
 
-from constants import COMMAND_CHECK, COMMAND_HELP, COMMAND_ID
+from constants import (
+    COMMAND_ADDUSER,
+    COMMAND_CANCEL,
+    COMMAND_CHECK,
+    COMMAND_HELP,
+    COMMAND_ID,
+    ROLE_ADMIN,
+    ROLE_USER,
+)
 from db import IMSADB
 from env_vars import BOT_TOKEN
-from helpers import get_uptime, render_template
+from helpers import get_uptime, is_valid_string, render_template
 from log import log_userinfo, logger
 
 # Bot dispatcher
@@ -20,6 +30,14 @@ dp = Dispatcher()
 
 # Database
 db = IMSADB()
+
+
+class AddUserSession(StatesGroup):
+    """Class to handle states"""
+
+    adduser_telegram_id = State()
+    adduser_name = State()
+    adduser_role = State()
 
 
 def require_user(func):
@@ -67,6 +85,15 @@ def only_for_admin(handler):
     return wrapper
 
 
+@dp.message(Command(COMMAND_CANCEL))
+@only_for_registered
+async def command_cancel(message: Message, state: FSMContext):
+    """Handler to cancel state"""
+    logger.debug("Canceling state. %s", log_userinfo(message))
+    await state.clear()
+    await message.answer(render_template("cancel.html"))
+
+
 @dp.message(Command(COMMAND_ID))
 async def command_id_handler(message: Message) -> None:
     """This handler receives messages with 'id' command"""
@@ -106,6 +133,8 @@ async def command_help_handler(message: Message) -> None:
                 cmd_help=COMMAND_HELP,
                 cmd_id=COMMAND_ID,
                 cmd_check=COMMAND_CHECK,
+                cmd_adduser=COMMAND_ADDUSER,
+                cmd_cancel=COMMAND_CANCEL,
             )
         )
     elif await db.is_user(message.from_user.id):
@@ -116,6 +145,7 @@ async def command_help_handler(message: Message) -> None:
                 cmd_help=COMMAND_HELP,
                 cmd_id=COMMAND_ID,
                 cmd_check=COMMAND_CHECK,
+                cmd_cancel=COMMAND_CANCEL,
             )
         )
     else:
@@ -134,9 +164,9 @@ async def command_help_handler(message: Message) -> None:
 async def command_check_handler(message: Message) -> None:
     """This handler receives messages with 'check' command"""
     assert message.from_user is not None
+    logger.debug("Sending check. %s", log_userinfo(message))
 
     # Get server uptime
-    logger.debug("Sending check. %s", log_userinfo(message))
     uptime = await get_uptime()
     if uptime is None:
         await message.answer(
@@ -144,6 +174,117 @@ async def command_check_handler(message: Message) -> None:
         )
         return
     await message.answer(render_template("check.html", uptime=uptime))
+
+
+@dp.message(Command(COMMAND_ADDUSER))
+@only_for_admin
+async def command_adduser_handler(message: Message, state: FSMContext) -> None:
+    """This handler receives messages with 'add_user' command"""
+    assert message.from_user is not None
+    logger.debug("Handling adduser. %s", log_userinfo(message))
+
+    # Ask for new user name
+    await message.answer(render_template("adduser_name.html"))
+    await state.set_state(AddUserSession.adduser_name)
+
+
+@dp.message(AddUserSession.adduser_name)
+@only_for_admin
+async def command_adduser_name_handler(message: Message, state: FSMContext):
+    """This handler receives telegnameram_id with 'add_user' command"""
+    assert message.from_user is not None
+    logger.debug("Handling adduser name. %s", log_userinfo(message))
+
+    # Get Name
+    name = str(message.text)
+    if not is_valid_string(name):
+        await message.answer(
+            render_template(
+                "error.html",
+                details="Incorrect name. Only lowercase, uppercase, number and underscore allowed",
+            )
+        )
+        await command_cancel(message, state)
+        return
+    logger.debug("Got name for new user: %s. %s", name, log_userinfo(message))
+
+    # Set Telegram ID
+    await state.update_data(name=name)
+
+    # Ask for new user Telegram ID
+    await message.answer(render_template("adduser_telegram_id.html"))
+    await state.set_state(AddUserSession.adduser_telegram_id)
+
+
+@dp.message(AddUserSession.adduser_telegram_id)
+@only_for_admin
+async def command_adduser_telegram_id_handler(message: Message, state: FSMContext):
+    """This handler receives telegram_id with 'add_user' command"""
+    assert message.from_user is not None
+    logger.debug("Handling adduser telegram_id. %s", log_userinfo(message))
+
+    # Get Telegram ID
+    try:
+        telegram_id = int(str(message.text))
+    except ValueError:
+        await message.answer(
+            render_template("error.html", details="Incorrect Telegram ID")
+        )
+        await command_cancel(message, state)
+        return
+    logger.debug(
+        "Got Telegram ID for new user: %d. %s", telegram_id, log_userinfo(message)
+    )
+
+    # Set Telegram ID
+    await state.update_data(telegram_id=telegram_id)
+
+    # Ask for new user role
+    await message.answer(
+        render_template("adduser_role.html", roles=(ROLE_USER, ROLE_ADMIN))
+    )
+    await state.set_state(AddUserSession.adduser_role)
+
+
+@dp.message(AddUserSession.adduser_role)
+@only_for_admin
+async def command_adduser_role_handler(message: Message, state: FSMContext):
+    """This handler receives role with 'add_user' command"""
+    assert message.from_user is not None
+    logger.debug("Handling adduser role. %s", log_userinfo(message))
+
+    # Get role
+    role = str(message.text)
+    if role not in (ROLE_ADMIN, ROLE_USER):
+        await message.answer(render_template("error.html", details="Incorrect role"))
+        await command_cancel(message, state)
+        return
+    logger.debug("Got role for new user: %s. %s", role, log_userinfo(message))
+
+    # Get session data
+    state_data = await state.get_data()
+
+    # Get Telegram ID
+    telegram_id = int(str(state_data.get("telegram_id")))  # Validated before
+
+    # Get Name
+    name = str(state_data.get("name"))  # Validated before
+
+    # Create new user
+    await db.add_user(telegram_id, name, role)
+
+    # Final message
+    await message.answer(
+        render_template(
+            "adduser_final.html",
+            name=name,
+            telegram_id=telegram_id,
+            role=role,
+        )
+    )
+
+    # Cleanup session
+    await state.clear()
 
 
 async def main():
