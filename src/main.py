@@ -15,6 +15,7 @@ from constants import (
     COMMAND_ADDUSER,
     COMMAND_CANCEL,
     COMMAND_CHECK,
+    COMMAND_GETUSERS,
     COMMAND_HELP,
     COMMAND_ID,
     ROLE_ADMIN,
@@ -174,6 +175,23 @@ async def command_check_handler(message: Message) -> None:
         )
         return
     await message.answer(render_template("check.html", uptime=uptime))
+
+
+@dp.message(Command(COMMAND_GETUSERS))
+@only_for_admin
+async def command_getusers_handler(message: Message) -> None:
+    """This handler receives messages with 'get_users' command"""
+    assert message.from_user is not None
+    logger.debug("Handling getusers. %s", log_userinfo(message))
+
+    # Get all users
+    users = await db.get_all_users()
+    if users is False:
+        render_template("error.html", details="Failed to get users data")
+        return
+
+    # Send all users
+    await message.answer(render_template("getusers.html", users=users))
 
 
 @dp.message(Command(COMMAND_ADDUSER))

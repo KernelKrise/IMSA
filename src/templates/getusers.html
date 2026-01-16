@@ -1,0 +1,5 @@
+Users:
+ID. Telegram_ID, Name, Role
+{% for user in users -%}
+{{ user['id'] }}. {{ user['telegram_id'] }}, {{ user['name'] }}, {{ user['role'] }}
+{% endfor %}
