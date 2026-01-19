@@ -19,6 +19,7 @@ from constants import (
     COMMAND_GETUSERS,
     COMMAND_HELP,
     COMMAND_ID,
+    MIN_DOWNTIME,
     ROLE_ADMIN,
     ROLE_USER,
 )
@@ -26,6 +27,7 @@ from db import IMSADB
 from env_vars import BOT_TOKEN
 from helpers import get_uptime, is_valid_string, render_template
 from log import log_userinfo, logger
+from timer import get_downtime, start_timer
 
 # Bot dispatcher
 dp = Dispatcher()
@@ -368,8 +370,8 @@ async def unknown_message_handler(message: Message):
     await message.answer(render_template("unknown.html", cmd_help=COMMAND_HELP))
 
 
-async def main():
-    """Main application function"""
+async def start_bot():
+    """Function to start bot."""
     logger.info("Application start")
 
     # Connect to database
@@ -403,5 +405,22 @@ async def main():
         await db.close()
 
 
+def main():
+    """Main application function."""
+    # Get downtime
+    downtime = get_downtime()
+
+    # Notify users if needed
+    if downtime > MIN_DOWNTIME:
+        logger.info("Server was down for %d seconds, notifying users", downtime)
+        # TODO: Notify users
+
+    # Start timer
+    start_timer()
+
+    # Start bot
+    asyncio.run(start_bot())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

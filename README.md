@@ -1,4 +1,5 @@
 # IMSA
+
 Is My Server Alive? Telegram Bot
 
 ## Description
@@ -25,7 +26,7 @@ docker compose up -d
 ```
 
 ## TODO
+
 - Notify users that server started
-- Downtime tracking
 - Track network issues
 - Write documentation

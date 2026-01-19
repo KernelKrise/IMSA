@@ -25,3 +25,9 @@ COMMAND_ADDUSER: str = "add_user"
 COMMAND_CANCEL: str = "cancel"
 COMMAND_GETUSERS: str = "get_users"
 COMMAND_DELUSER: str = "delete_user"
+
+TIMER_FILENAME: str = "timer"
+TIMER_FILEPATH: str = path.join(DATA_DIR, TIMER_FILENAME)
+TIMER_TIMEOUT: int = 1
+
+MIN_DOWNTIME: int = 60
