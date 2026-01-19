@@ -1,32 +1,72 @@
 # IMSA
 
-Is My Server Alive? Telegram Bot
+IMSA (Is My Server Alive?) is a Telegram bot that helps you check the availability and runtime information of your server. You run the bot on your server, and if it replies, the server is up. If it stops replying, the server may be down or unreachable, it will notify you when it is back online.
 
-## Description
+## Prerequisites
 
-Deploy this bot on your server. When lauched, if the bot responds, the server is alive and you can get runtime information.
-If not, the server is down. So, you can track your server availability even if it under NAT.
+Before using IMSA you need:
 
-## Environment
+- A running server
+- Docker and Docker Compose
+- A Telegram Bot Token from [BotFather](https://t.me/BotFather)
+- Your Telegram user ID
 
-You need to fill out file: `.env` as in `env_example` with the following values:
+## Installation
 
-1. `BOT_TOKEN` can be obtained with: [BotFather](https://t.me/BotFather)
-2. `OWNER_USER_ID` can be obtained with specialized bots
+Clone the Repository
 
-## Requirements
+```shell
+git clone https://github.com/KernelKrise/IMSA.git
+cd IMSA
+```
 
-- Docker
-- Docker Compose
+Copy the example environment file:
 
-## Start
+```shell
+cp env_example .env
+```
 
-```bash
+Open `.env` and set the following:
+
+- `BOT_TOKEN` — your Telegram bot token from BotFather
+- `OWNER_USER_ID` — your Telegram user ID (can be fetched with user ID bots)
+
+Example .env format:
+
+```shell
+BOT_TOKEN=123456789:ABCDEF...
+OWNER_USER_ID=987654321
+```
+
+Launch with Docker Compose:
+
+```shell
 docker compose up -d
 ```
 
+## User Guide
+
+Commands available:
+
+- `/start` – Greeting message
+- `/help` – Help message
+- `/id` - Get your Telegram ID
+- `/check` - Check server runtime information (registration required)
+
+Also, if you are registered user, you will recieve notification when server back online
+
+> To register, send your telegram ID to administrator
+
+## Admin guide
+
+Admin has access to all user commands along with:
+
+- `/add_user` - Register user
+- `/get_users` - Get all registered users
+- `/delete_user` - Delete user
+- `/cancel` - Cancel command
+
 ## TODO
 
-- Toggle downtime notification
-- Track network issues
-- Write documentation
+- Add network downtime tracking
+- Add notification toggle

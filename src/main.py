@@ -116,7 +116,7 @@ def only_for_admin(handler):
 
 @dp.message(Command(COMMAND_CANCEL))
 @skip_downtime
-@only_for_registered
+@only_for_admin
 async def command_cancel(message: Message, state: FSMContext):
     """Handler to cancel state"""
     logger.debug("Canceling state. %s", log_userinfo(message))
