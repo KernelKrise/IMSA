@@ -2,6 +2,7 @@
 
 import asyncio
 from functools import wraps
+from time import time
 from typing import Iterable
 
 from aiogram import Bot, Dispatcher
@@ -38,6 +39,9 @@ dp = Dispatcher()
 # Database
 db = IMSADB()
 
+# Bot start time
+bot_start_time: float = time()
+
 
 class AddUserSession(StatesGroup):
     """Class to handle states of adduser command"""
@@ -51,6 +55,18 @@ class DelUserSession(StatesGroup):
     """Class to handle states of deluser command"""
 
     deluser_telegram_id = State()
+
+
+def skip_downtime(func):
+    """Decorator to skip messages during downtime."""
+
+    @wraps(func)
+    async def wrapper(message: Message, *args, **kwargs):
+        if message.date.timestamp() < bot_start_time:
+            return
+        return await func(message, *args, **kwargs)
+
+    return wrapper
 
 
 def require_user(func):
@@ -99,6 +115,7 @@ def only_for_admin(handler):
 
 
 @dp.message(Command(COMMAND_CANCEL))
+@skip_downtime
 @only_for_registered
 async def command_cancel(message: Message, state: FSMContext):
     """Handler to cancel state"""
@@ -108,6 +125,7 @@ async def command_cancel(message: Message, state: FSMContext):
 
 
 @dp.message(Command(COMMAND_ID))
+@skip_downtime
 async def command_id_handler(message: Message) -> None:
     """This handler receives messages with 'id' command"""
     assert message.from_user is not None
@@ -117,6 +135,7 @@ async def command_id_handler(message: Message) -> None:
 
 
 @dp.message(CommandStart())
+@skip_downtime
 async def command_start_handler(message: Message) -> None:
     """This handler receives messages with 'start' command"""
     assert message.from_user is not None
@@ -133,6 +152,7 @@ async def command_start_handler(message: Message) -> None:
 
 
 @dp.message(Command(COMMAND_HELP))
+@skip_downtime
 async def command_help_handler(message: Message) -> None:
     """This handler receives messages with 'help' command"""
     assert message.from_user is not None
@@ -175,6 +195,7 @@ async def command_help_handler(message: Message) -> None:
 
 
 @dp.message(Command(COMMAND_CHECK))
+@skip_downtime
 @only_for_registered
 async def command_check_handler(message: Message) -> None:
     """This handler receives messages with 'check' command"""
@@ -192,6 +213,7 @@ async def command_check_handler(message: Message) -> None:
 
 
 @dp.message(Command(COMMAND_GETUSERS))
+@skip_downtime
 @only_for_admin
 async def command_getusers_handler(message: Message) -> None:
     """This handler receives messages with 'get_users' command"""
@@ -209,6 +231,7 @@ async def command_getusers_handler(message: Message) -> None:
 
 
 @dp.message(Command(COMMAND_DELUSER))
+@skip_downtime
 @only_for_admin
 async def command_deluser_handler(message: Message, state: FSMContext) -> None:
     """This handler receives messages with 'delete_user' command"""
@@ -221,6 +244,7 @@ async def command_deluser_handler(message: Message, state: FSMContext) -> None:
 
 
 @dp.message(DelUserSession.deluser_telegram_id)
+@skip_downtime
 @only_for_admin
 async def command_deluser_telegram_id_handler(message: Message, state: FSMContext):
     """This handler receives telegram_id with 'delete_user' command"""
@@ -254,6 +278,7 @@ async def command_deluser_telegram_id_handler(message: Message, state: FSMContex
 
 
 @dp.message(Command(COMMAND_ADDUSER))
+@skip_downtime
 @only_for_admin
 async def command_adduser_handler(message: Message, state: FSMContext) -> None:
     """This handler receives messages with 'add_user' command"""
@@ -266,6 +291,7 @@ async def command_adduser_handler(message: Message, state: FSMContext) -> None:
 
 
 @dp.message(AddUserSession.adduser_name)
+@skip_downtime
 @only_for_admin
 async def command_adduser_name_handler(message: Message, state: FSMContext):
     """This handler receives telegnameram_id with 'add_user' command"""
@@ -294,6 +320,7 @@ async def command_adduser_name_handler(message: Message, state: FSMContext):
 
 
 @dp.message(AddUserSession.adduser_telegram_id)
+@skip_downtime
 @only_for_admin
 async def command_adduser_telegram_id_handler(message: Message, state: FSMContext):
     """This handler receives telegram_id with 'add_user' command"""
@@ -324,6 +351,7 @@ async def command_adduser_telegram_id_handler(message: Message, state: FSMContex
 
 
 @dp.message(AddUserSession.adduser_role)
+@skip_downtime
 @only_for_admin
 async def command_adduser_role_handler(message: Message, state: FSMContext):
     """This handler receives role with 'add_user' command"""
@@ -365,6 +393,7 @@ async def command_adduser_role_handler(message: Message, state: FSMContext):
 
 
 @dp.message()
+@skip_downtime
 @require_user
 async def unknown_message_handler(message: Message):
     """This handler receives unknown commands"""
@@ -430,6 +459,9 @@ async def start_bot(downtime: int):
                 BotCommand(command=COMMAND_HELP, description="Get bot help"),
             ]
         )
+
+        # Skip messages during downtime
+        await bot.get_updates(offset=None, limit=1, timeout=0)
 
         # Notify users about downtime if needed
         if downtime > MIN_DOWNTIME:
