@@ -2,10 +2,12 @@
 
 import asyncio
 from functools import wraps
+from typing import Iterable
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiogram.exceptions import TelegramForbiddenError
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -19,13 +21,14 @@ from constants import (
     COMMAND_GETUSERS,
     COMMAND_HELP,
     COMMAND_ID,
+    DOWNTIME_NOTIFICATION_TIMEOUT,
     MIN_DOWNTIME,
     ROLE_ADMIN,
     ROLE_USER,
 )
 from db import IMSADB
 from env_vars import BOT_TOKEN
-from helpers import get_uptime, is_valid_string, render_template
+from helpers import format_seconds, get_uptime, is_valid_string, render_template
 from log import log_userinfo, logger
 from timer import get_downtime, start_timer
 
@@ -370,7 +373,43 @@ async def unknown_message_handler(message: Message):
     await message.answer(render_template("unknown.html", cmd_help=COMMAND_HELP))
 
 
-async def start_bot():
+async def notify_users_downtime(bot: Bot, downtime: int) -> None:
+    """Function to notify users about downtime.
+
+    Args:
+        bot (Bot): Bot instance.
+        downtime (int): Downtime in seconds.
+    """
+    # Get human readable downtime
+    downtime_str = format_seconds(downtime)
+
+    # Get users to notify
+    users = await db.get_all_users()
+    if not isinstance(users, Iterable):
+        logger.error("CFailed to get users to notify about downtime")
+        return
+
+    # Iterate through users
+    logger.info("Starting sending downtime notifications")
+    for user in users:
+        telegram_id = user["telegram_id"]
+        try:
+            logger.debug(
+                "Sending downtime notification to user with telegram_id: %d",
+                telegram_id,
+            )
+            await bot.send_message(
+                telegram_id, render_template("downtime.html", downtime=downtime_str)
+            )
+        except TelegramForbiddenError:
+            logger.debug(
+                "Can not send downtime notification to user with telegram_id: %d",
+                telegram_id,
+            )
+        await asyncio.sleep(DOWNTIME_NOTIFICATION_TIMEOUT)
+
+
+async def start_bot(downtime: int):
     """Function to start bot."""
     logger.info("Application start")
 
@@ -392,6 +431,11 @@ async def start_bot():
             ]
         )
 
+        # Notify users about downtime if needed
+        if downtime > MIN_DOWNTIME:
+            logger.info("Notifying user about downtime")
+            asyncio.create_task(notify_users_downtime(bot, downtime))
+
         # Start bot
         logger.info("Starting bot")
         await dp.start_polling(bot)
@@ -409,17 +453,13 @@ def main():
     """Main application function."""
     # Get downtime
     downtime = get_downtime()
-
-    # Notify users if needed
-    if downtime > MIN_DOWNTIME:
-        logger.info("Server was down for %d seconds, notifying users", downtime)
-        # TODO: Notify users
+    logger.info("Server was down for %d seconds", downtime)
 
     # Start timer
     start_timer()
 
     # Start bot
-    asyncio.run(start_bot())
+    asyncio.run(start_bot(downtime))
 
 
 if __name__ == "__main__":

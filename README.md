@@ -27,6 +27,6 @@ docker compose up -d
 
 ## TODO
 
-- Notify users that server started
+- Toggle downtime notification
 - Track network issues
 - Write documentation
