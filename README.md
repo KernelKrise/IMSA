@@ -44,6 +44,15 @@ Launch with Docker Compose:
 docker compose up -d
 ```
 
+## Update
+
+To update your IMSA installation, use the following command:
+
+```shell
+git pull
+docker compose up -d --build --force-recreate
+```
+
 ## User Guide
 
 Commands available:
