@@ -75,4 +75,3 @@ Admin has access to all user commands along with:
 - `/delete_user` - Delete user
 - `/cancel` - Cancel command
 
-## TODO
