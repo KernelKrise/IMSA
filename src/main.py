@@ -2,6 +2,7 @@
 
 import asyncio
 from functools import wraps
+from os import getpid
 from time import time
 from typing import Iterable
 
@@ -37,6 +38,7 @@ from helpers import (
     wait_for_network,
 )
 from log import log_userinfo, logger
+from network_tracker import start_network_tracker
 from timer import get_downtime, start_timer
 
 # Bot dispatcher
@@ -500,6 +502,9 @@ def main():
 
     # Start timer
     start_timer()
+
+    # Start network tracker
+    start_network_tracker(getpid())
 
     # Start bot
     asyncio.run(start_bot(downtime))

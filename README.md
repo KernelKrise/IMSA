@@ -76,6 +76,3 @@ Admin has access to all user commands along with:
 - `/cancel` - Cancel command
 
 ## TODO
-
-- Add network downtime tracking
-- Add notification toggle

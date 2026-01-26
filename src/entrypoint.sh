@@ -12,3 +12,5 @@ source "${POETRY_HOME}/.venv/bin/activate"
 # Start application
 ilog "Starting application"
 python3 main.py
+
+ilog "Bye!"
