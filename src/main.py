@@ -29,7 +29,13 @@ from constants import (
 )
 from db import IMSADB
 from env_vars import BOT_TOKEN
-from helpers import format_seconds, get_uptime, is_valid_string, render_template
+from helpers import (
+    format_seconds,
+    get_uptime,
+    is_valid_string,
+    render_template,
+    wait_for_network,
+)
 from log import log_userinfo, logger
 from timer import get_downtime, start_timer
 
@@ -483,6 +489,11 @@ async def start_bot(downtime: int):
 
 def main():
     """Main application function."""
+    # Check until network available
+    logger.info("Waiting for network")
+    wait_for_network()
+    logger.info("Network available")
+
     # Get downtime
     downtime = get_downtime()
     logger.info("Server was down for %d seconds", downtime)

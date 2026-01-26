@@ -3,6 +3,7 @@
 import asyncio
 import re
 import socket
+from time import sleep
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -10,6 +11,7 @@ from constants import (
     NETWORK_CHECK_MAX_RETRY,
     NETWORK_CHECK_TARGETS,
     NETWORK_CHECK_TIMEOUT,
+    NETWORK_CHECK_WAIT,
 )
 from log import logger
 
@@ -114,4 +116,13 @@ def network_available() -> bool:
             except (socket.timeout, socket.error):
                 logger.debug("Network unavailable for target: %s:%d", host, port)
                 continue
+    logger.debug("Network unavailable")
     return False
+
+
+def wait_for_network() -> None:
+    """Loop until network available"""
+    while True:
+        if network_available():
+            break
+        sleep(NETWORK_CHECK_WAIT)
