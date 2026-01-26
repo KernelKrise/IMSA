@@ -2,6 +2,7 @@
 
 import asyncio
 from functools import wraps
+from os import getpid
 from time import time
 from typing import Iterable
 
@@ -29,8 +30,15 @@ from constants import (
 )
 from db import IMSADB
 from env_vars import BOT_TOKEN
-from helpers import format_seconds, get_uptime, is_valid_string, render_template
+from helpers import (
+    format_seconds,
+    get_uptime,
+    is_valid_string,
+    render_template,
+    wait_for_network,
+)
 from log import log_userinfo, logger
+from network_tracker import start_network_tracker
 from timer import get_downtime, start_timer
 
 # Bot dispatcher
@@ -463,8 +471,8 @@ async def start_bot(downtime: int):
         # Skip messages during downtime
         await bot.get_updates(offset=None, limit=1, timeout=0)
 
-        # Notify users about downtime if needed
-        if downtime > MIN_DOWNTIME:
+        # Notify users about downtime if needed (downtime < 0 if corrupted downtime)
+        if downtime > MIN_DOWNTIME or downtime < 0:
             logger.info("Notifying user about downtime")
             asyncio.create_task(notify_users_downtime(bot, downtime))
 
@@ -483,12 +491,20 @@ async def start_bot(downtime: int):
 
 def main():
     """Main application function."""
+    # Check until network available
+    logger.info("Waiting for network")
+    wait_for_network()
+    logger.info("Network available")
+
     # Get downtime
     downtime = get_downtime()
     logger.info("Server was down for %d seconds", downtime)
 
     # Start timer
     start_timer()
+
+    # Start network tracker
+    start_network_tracker(getpid())
 
     # Start bot
     asyncio.run(start_bot(downtime))

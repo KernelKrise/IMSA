@@ -2,9 +2,17 @@
 
 import asyncio
 import re
+import socket
+from time import sleep
 
 from jinja2 import Environment, FileSystemLoader
 
+from constants import (
+    NETWORK_CHECK_MAX_RETRY,
+    NETWORK_CHECK_TARGETS,
+    NETWORK_CHECK_TIMEOUT,
+    NETWORK_CHECK_WAIT,
+)
 from log import logger
 
 # Jinja2 environment
@@ -75,6 +83,10 @@ def format_seconds(seconds: int) -> str:
         str: Human readable time format.
     """
 
+    # If negative seconds value
+    if seconds < 0:
+        return "[UNKNOWN]"
+
     # Calculate metrics
     days, seconds = divmod(seconds, 86400)
     hours, seconds = divmod(seconds, 3600)
@@ -90,3 +102,31 @@ def format_seconds(seconds: int) -> str:
         parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
 
     return ", ".join(parts)
+
+
+def network_available() -> bool:
+    """Check if network available.
+
+    Returns:
+        bool: True if available, False if not available.
+    """
+    for i in range(NETWORK_CHECK_MAX_RETRY):
+        for host, port in NETWORK_CHECK_TARGETS:
+            try:
+                with socket.create_connection(
+                    (host, port), timeout=NETWORK_CHECK_TIMEOUT + i
+                ):
+                    return True
+            except (socket.timeout, socket.error):
+                logger.debug("Network unavailable for target: %s:%d", host, port)
+                continue
+    logger.debug("Network unavailable")
+    return False
+
+
+def wait_for_network() -> None:
+    """Loop until network available"""
+    while True:
+        if network_available():
+            break
+        sleep(NETWORK_CHECK_WAIT)

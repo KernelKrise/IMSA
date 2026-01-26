@@ -17,6 +17,9 @@ services:
       - imsa-data:/app/data
     networks:
       - imsa-net
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     restart: always
 
 volumes:

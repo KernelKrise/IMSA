@@ -38,7 +38,7 @@ def get_downtime() -> int:
     """Get downtime based on saved timestump.
 
     Returns:
-        int: Downtime in seconds. 0 on error.
+        int: Downtime in seconds. 0 on error. -1 on corrupted file.
     """
     # Check if saved timestamp exists
     if not path.exists(TIMER_FILEPATH):
@@ -57,7 +57,7 @@ def get_downtime() -> int:
         saved_time = int(saved_time)
     except ValueError:
         logger.error("Failed to read saved timestamp")
-        return 0
+        return -1
 
     # Calculate downtime
     return current_time - saved_time
