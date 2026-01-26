@@ -471,8 +471,8 @@ async def start_bot(downtime: int):
         # Skip messages during downtime
         await bot.get_updates(offset=None, limit=1, timeout=0)
 
-        # Notify users about downtime if needed
-        if downtime > MIN_DOWNTIME:
+        # Notify users about downtime if needed (downtime < 0 if corrupted downtime)
+        if downtime > MIN_DOWNTIME or downtime < 0:
             logger.info("Notifying user about downtime")
             asyncio.create_task(notify_users_downtime(bot, downtime))
 

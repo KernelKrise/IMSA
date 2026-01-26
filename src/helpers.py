@@ -83,6 +83,10 @@ def format_seconds(seconds: int) -> str:
         str: Human readable time format.
     """
 
+    # If negative seconds value
+    if seconds < 0:
+        return "[UNKNOWN]"
+
     # Calculate metrics
     days, seconds = divmod(seconds, 86400)
     hours, seconds = divmod(seconds, 3600)
