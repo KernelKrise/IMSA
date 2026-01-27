@@ -2,7 +2,7 @@
 
 from os import path
 
-VERSION: str = "1.2.2"
+VERSION: str = "1.2.3"
 
 DATA_DIR: str = "data"
 
@@ -35,7 +35,7 @@ MIN_DOWNTIME: int = 60
 DOWNTIME_NOTIFICATION_TIMEOUT: float = 0.1
 
 NETWORK_TRACKER_TIMEOUT: int = 1
-NETWORK_CHECK_TARGETS: list = [("api.telegram.org", 443)]
-NETWORK_CHECK_TIMEOUT: int = 1
-NETWORK_CHECK_MAX_RETRY: int = 3
+NETWORK_CHECK_TARGET: tuple = ("api.telegram.org", 443)
+NETWORK_CHECK_TIMEOUT: int = 5
 NETWORK_CHECK_WAIT: int = 1
+NETWORK_CHECK_MAX_WAIT: int = 7 * 60

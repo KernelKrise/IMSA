@@ -3,13 +3,13 @@
 import asyncio
 import re
 import socket
-from time import sleep
+from time import sleep, time
 
 from jinja2 import Environment, FileSystemLoader
 
 from constants import (
-    NETWORK_CHECK_MAX_RETRY,
-    NETWORK_CHECK_TARGETS,
+    NETWORK_CHECK_MAX_WAIT,
+    NETWORK_CHECK_TARGET,
     NETWORK_CHECK_TIMEOUT,
     NETWORK_CHECK_WAIT,
 )
@@ -110,17 +110,17 @@ def network_available() -> bool:
     Returns:
         bool: True if available, False if not available.
     """
-    for i in range(NETWORK_CHECK_MAX_RETRY):
-        for host, port in NETWORK_CHECK_TARGETS:
-            try:
-                with socket.create_connection(
-                    (host, port), timeout=NETWORK_CHECK_TIMEOUT + i
-                ):
-                    return True
-            except (socket.timeout, socket.error):
-                logger.debug("Network unavailable for target: %s:%d", host, port)
-                continue
-    logger.debug("Network unavailable")
+    start_time = time()
+    while time() - start_time < NETWORK_CHECK_MAX_WAIT:
+        host, port = NETWORK_CHECK_TARGET
+        try:
+            with socket.create_connection((host, port), timeout=NETWORK_CHECK_TIMEOUT):
+                return True
+        except (socket.timeout, socket.error):
+            logger.debug("Network unavailable for target: %s:%d", host, port)
+            continue
+        sleep(NETWORK_CHECK_WAIT)
+    logger.debug("Network unavailable for more then %d seconds", NETWORK_CHECK_MAX_WAIT)
     return False
 
 
