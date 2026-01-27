@@ -2,7 +2,7 @@
 
 from os import path
 
-VERSION: str = "1.2.1"
+VERSION: str = "1.2.2"
 
 DATA_DIR: str = "data"
 

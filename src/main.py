@@ -371,7 +371,7 @@ async def command_adduser_role_handler(message: Message, state: FSMContext):
     logger.debug("Handling adduser role. %s", log_userinfo(message))
 
     # Get role
-    role = str(message.text)
+    role = str(message.text).lower()
     if role not in (ROLE_ADMIN, ROLE_USER):
         await message.answer(render_template("error.html", details="Incorrect role"))
         await command_cancel(message, state)
