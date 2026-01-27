@@ -27,6 +27,7 @@ from constants import (
     MIN_DOWNTIME,
     ROLE_ADMIN,
     ROLE_USER,
+    VERSION,
 )
 from db import IMSADB
 from env_vars import BOT_TOKEN
@@ -151,7 +152,11 @@ async def command_start_handler(message: Message) -> None:
     # Greet user
     logger.debug("Sending greeting. %s", log_userinfo(message))
     await message.answer(
-        render_template("greeting.html", username=message.from_user.username),
+        render_template(
+            "greeting.html",
+            username=message.from_user.username,
+            version=VERSION,
+        ),
         disable_web_page_preview=True,
     )
 
@@ -174,8 +179,8 @@ async def command_help_handler(message: Message) -> None:
                 cmd_help=COMMAND_HELP,
                 cmd_id=COMMAND_ID,
                 cmd_check=COMMAND_CHECK,
-                cmd_adduser=COMMAND_ADDUSER,
                 cmd_cancel=COMMAND_CANCEL,
+                cmd_adduser=COMMAND_ADDUSER,
                 cmd_getusers=COMMAND_GETUSERS,
                 cmd_deluser=COMMAND_DELUSER,
             )
@@ -188,7 +193,6 @@ async def command_help_handler(message: Message) -> None:
                 cmd_help=COMMAND_HELP,
                 cmd_id=COMMAND_ID,
                 cmd_check=COMMAND_CHECK,
-                cmd_cancel=COMMAND_CANCEL,
             )
         )
     else:
@@ -448,10 +452,8 @@ async def notify_users_downtime(bot: Bot, downtime: int) -> None:
 
 async def start_bot(downtime: int):
     """Function to start bot."""
-    logger.info("Application start")
-
     # Connect to database
-    logger.info("Starting database")
+    logger.info("Starting bot database")
     await db.connect()
 
     # Initialize Bot instance
@@ -491,6 +493,8 @@ async def start_bot(downtime: int):
 
 def main():
     """Main application function."""
+    logger.info("Starting IMSA v%s", VERSION)
+
     # Check until network available
     logger.info("Waiting for network")
     wait_for_network()

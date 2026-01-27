@@ -2,6 +2,8 @@
 
 from os import path
 
+VERSION: str = "1.2.1"
+
 DATA_DIR: str = "data"
 
 LOGGER_NAME: str = "imsa"
