@@ -1,0 +1,7 @@
+services:
+  reciever:
+    container_name: reciever
+    build: .
+    networks:
+      - imsa-net
+    restart: unless-stopped

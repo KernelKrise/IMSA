@@ -1,0 +1,7 @@
+services:
+  api:
+    container_name: api
+    build: .
+    networks:
+      - imsa-net
+    restart: unless-stopped

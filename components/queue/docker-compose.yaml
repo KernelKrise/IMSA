@@ -1,0 +1,7 @@
+services:
+  queue:
+    container_name: queue
+    image: redis:8-trixie
+    networks:
+      - imsa-net
+    restart: unless-stopped

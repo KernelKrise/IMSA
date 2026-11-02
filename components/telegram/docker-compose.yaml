@@ -1,0 +1,7 @@
+services:
+  telegram:
+    container_name: telegram
+    build: .
+    networks:
+      - imsa-net
+    restart: unless-stopped

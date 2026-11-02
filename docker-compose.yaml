@@ -1,0 +1,17 @@
+include:
+  - components/reciever/docker-compose.yaml
+  - components/api/docker-compose.yaml
+  - components/monitor/docker-compose.yaml
+  - components/queue/docker-compose.yaml
+  - components/db/docker-compose.yaml
+  - components/telegram/docker-compose.yaml
+
+volumes:
+  postgres-data:
+    name: postgres-data
+    driver: local
+
+networks:
+  imsa-net:
+    name: imsa-net
+    driver: bridge

@@ -1,0 +1,7 @@
+services:
+  monitor:
+    container_name: monitor
+    build: .
+    networks:
+      - imsa-net
+    restart: unless-stopped
