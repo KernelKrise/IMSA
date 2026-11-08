@@ -6,7 +6,12 @@ from sys import stdout
 from flask import Flask
 from werkzeug.exceptions import HTTPException
 
-from constants import COMMON_ERROR_RESPONSE, COMMON_SUCCESS_RESPONSE, DEBUG, LOGGER_NAME
+from constants import (
+    COMMON_ERROR_RESPONSE,
+    COMMON_SUCCESS_RESPONSE,
+    DEBUG,
+    LOGGER_NAME,
+)
 
 # Create logger
 logger = logging.getLogger(LOGGER_NAME)
