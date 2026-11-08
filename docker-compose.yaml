@@ -1,5 +1,5 @@
 include:
-  - components/reciever/docker-compose.yaml
+  - components/receiver/docker-compose.yaml
   - components/api/docker-compose.yaml
   - components/monitor/docker-compose.yaml
   - components/queue/docker-compose.yaml

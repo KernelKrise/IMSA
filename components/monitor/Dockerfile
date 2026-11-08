@@ -22,7 +22,7 @@ RUN groupadd --gid ${UID} ${USERNAME}
 RUN useradd --no-create-home --uid ${UID} --gid ${UID} ${USERNAME}
 
 
-FROM base as builder
+FROM base AS builder
 
 # Create poetry directory
 WORKDIR ${POETRY_HOME}
@@ -34,7 +34,7 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-root
 
 
-FROM base as release
+FROM base AS release
 
 # Copy poetry environment
 COPY --from=builder ${POETRY_HOME}/.venv ${POETRY_HOME}/.venv

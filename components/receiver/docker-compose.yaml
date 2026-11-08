@@ -1,0 +1,11 @@
+services:
+  receiver:
+    container_name: receiver
+    build: .
+    environment:
+      - DEBUG=${DEBUG:-}
+    ports:
+      - "8080:8080"
+    networks:
+      - imsa-net
+    restart: unless-stopped
