@@ -2,6 +2,18 @@ services:
   receiver:
     container_name: receiver
     build: .
+    depends_on:
+      db:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          '[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://127.0.0.1:8080/health)" = "200" ] || exit 1',
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     environment:
       - DEBUG=${DEBUG:-}
     ports:
