@@ -4,6 +4,7 @@ services:
     image: postgres:18-trixie
     volumes:
       - postgres-data:/var/lib/postgresql:rw
+      - ./init:/docker-entrypoint-initdb.d
     environment:
       - "POSTGRES_USER=${POSTGRES_USER:?}"
       - "POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?}"
