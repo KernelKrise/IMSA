@@ -28,11 +28,8 @@ DEBUG: bool = getenv("DEBUG", "").strip().lower() == "true"
 # PostgreSQL URL
 POSTGRES_URL: str = getenv_required("POSTGRES_URL")
 
-# Common error response
-COMMON_ERROR_RESPONSE: tuple = ("", 404)
-
-# Common success response
-COMMON_SUCCESS_RESPONSE: tuple = ("", 200)
-
 # Logger name
 LOGGER_NAME: str = "RECEIVER"
+
+# Ping route
+PING_ROUTE: str = "/ping"
