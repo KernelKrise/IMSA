@@ -1,18 +1,20 @@
 CREATE TABLE IF NOT EXISTS agents (
-    guid       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name       VARCHAR(256) NOT NULL,
-    status     VARCHAR(64),
-    last_seen  TIMESTAMPTZ,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    guid            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name            VARCHAR(256) NOT NULL,
+    description     VARCHAR(1024),
+    status          VARCHAR(64),
+    last_seen       TIMESTAMPTZ,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS users (
-    guid        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name        VARCHAR(256) NOT NULL,
-    role        VARCHAR(64) NOT NULL,
-    platform    VARCHAR(64) NOT NULL,
-    platform_id VARCHAR(256) NOT NULL,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    guid            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name            VARCHAR(256) NOT NULL,
+    description     VARCHAR(1024),
+    role            VARCHAR(64) NOT NULL,
+    platform        VARCHAR(64) NOT NULL,
+    platform_id     VARCHAR(256) NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (platform, platform_id)
 );
 
