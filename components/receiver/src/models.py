@@ -10,5 +10,5 @@ class PingData(BaseModel):
         extra="ignore", validate_assignment=True, validate_default=True
     )
 
-    # Agent ID
-    agent_id: UUID4
+    # Agent key
+    key: UUID4

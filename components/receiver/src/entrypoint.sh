@@ -11,8 +11,7 @@ ilog() {
 # Variables
 HOST=0.0.0.0
 PORT=8080
-CORES=$(nproc)
-WORKERS=$((${CORES} * 2))
+WORKERS=$(nproc)
 THREADS=2
 
 # Activate poetry venv

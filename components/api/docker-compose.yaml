@@ -2,6 +2,23 @@ services:
   api:
     container_name: api
     build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          '[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://127.0.0.1:8080/health)" = "200" ] || exit 1',
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    environment:
+      - "DEBUG=${DEBUG:-}"
+      - "POSTGRES_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
+    ports:
+      - "127.0.0.1:8000:8000"
     networks:
       - imsa-net
     restart: unless-stopped

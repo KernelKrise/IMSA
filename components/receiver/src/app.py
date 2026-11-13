@@ -13,7 +13,7 @@ from constants import (
 )
 from db import update_agent_last_seen
 from models import PingData
-from utils import format_response
+from utils import compose_response
 
 # Create logger
 logger = logging.getLogger(LOGGER_NAME)
@@ -32,7 +32,7 @@ app = Flask(__name__)
 @app.route("/health")
 def health():
     """Healthcheck route"""
-    return format_response("healthy")
+    return compose_response({"status": "healthy"})
 
 
 @app.route(PING_ROUTE, methods=["POST"])
@@ -44,14 +44,12 @@ def ping():
         ping_data: PingData = PingData.model_validate_json(request.get_data())
     except ValidationError as ex:
         logger.debug("Ping data validation error:\n%s", ex)
-        return format_response("Ping data validation error", status=400)
+        return compose_response({"error": "Ping data validation error"}, status=400)
     logger.debug("Ping data: %s", ping_data.model_dump_json())
 
     # Update agent's last_seen
-    if update_agent_last_seen(ping_data.agent_id) is False:
-        logger.debug(
-            "Agent's %s 'last_seen' field failed to update", ping_data.agent_id
-        )
-        return format_response("Failed to process ping", status=400)
+    if update_agent_last_seen(ping_data) is False:
+        logger.debug("Agent's %s 'last_seen' field failed to update", ping_data.key)
+        return compose_response({"error": "Failed to process ping"}, status=400)
 
-    return format_response("ok")
+    return compose_response({"status": "success"})

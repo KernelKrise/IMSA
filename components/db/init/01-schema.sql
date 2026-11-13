@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS agents (
-    guid            UUID PRIMARY KEY,
+    id_             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    key             UUID NOT NULL UNIQUE,
     name            VARCHAR(256) NOT NULL,
     description     VARCHAR(1024),
     status          VARCHAR(64) NOT NULL,
@@ -8,7 +9,7 @@ CREATE TABLE IF NOT EXISTS agents (
 );
 
 CREATE TABLE IF NOT EXISTS users (
-    guid            UUID PRIMARY KEY,
+    id_             BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name            VARCHAR(256) NOT NULL,
     description     VARCHAR(1024),
     role            VARCHAR(64) NOT NULL,
@@ -19,14 +20,14 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS user_agents (
-    user_guid  UUID NOT NULL REFERENCES users(guid) ON DELETE CASCADE,
-    agent_guid UUID NOT NULL REFERENCES agents(guid) ON DELETE CASCADE,
-    PRIMARY KEY (user_guid, agent_guid)
+    user_id  BIGINT   NOT NULL REFERENCES users(id_) ON DELETE CASCADE,
+    agent_id BIGINT   NOT NULL REFERENCES agents(id_) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, agent_id)
 );
 
 CREATE TABLE IF NOT EXISTS stats (
-    guid        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    agent_guid  UUID NOT NULL REFERENCES agents(guid) ON DELETE CASCADE,
-    recorded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    id_         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    agent_id    BIGINT NOT NULL REFERENCES agents(id_) ON DELETE CASCADE,
+    recorded_at TIMESTAMPTZ NOT NULL,
     status      VARCHAR(64) NOT NULL
 );

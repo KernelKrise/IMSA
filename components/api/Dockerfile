@@ -12,14 +12,19 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UID=1000 \
     USERNAME=app
 
-# Install poetry
-RUN pip3 install poetry==${POETRY_VERSION}
-
 # Create unprivileged group
 RUN groupadd --gid ${UID} ${USERNAME}
 
 # Create unprivileged user
 RUN useradd --no-create-home --uid ${UID} --gid ${UID} ${USERNAME}
+
+# Install poetry
+RUN pip3 install poetry==${POETRY_VERSION}
+
+# Install dependencies
+RUN DEBIAN_FRONTEND=noninteractive apt-get update -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
 
 
 FROM base AS builder
